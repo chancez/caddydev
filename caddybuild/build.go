@@ -150,7 +150,23 @@ func gen(middlewares features.Middlewares) custombuild.CodeGenFunc {
 			out = out[:end] + snippet + out[end:]
 		}
 
-		return ioutil.WriteFile(file, []byte(out), os.FileMode(0660))
+		// Save modified code file
+		err = ioutil.WriteFile(file, []byte(out), os.FileMode(0660))
+		if err != nil {
+			return err
+		}
+
+		// Run `go generate` for all add-on middlewares
+		for _, m := range middlewares {
+			cmd := exec.Command("go", "generate", m.Package)
+			cmd.Stderr = os.Stderr
+			err := cmd.Run()
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
 	}
 }
 
