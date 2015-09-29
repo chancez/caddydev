@@ -8,19 +8,19 @@ import (
 
 func TestGetPrevDirective(t *testing.T) {
 	features.Registry = features.Middlewares{
-		{"log", ""},
-		{"gzip", ""},
-		{"errors", ""},
-		{"header", ""},
-		{"rewrite", ""},
-		{"redir", ""},
-		{"ext", ""},
-		{"basicauth", ""},
-		{"internal", ""},
-		{"proxy", ""},
-		{"fastcgi", ""},
-		{"websocket", ""},
-		{"markdown", ""},
+		{"log", "", ""},
+		{"gzip", "", ""},
+		{"errors", "", ""},
+		{"header", "", ""},
+		{"rewrite", "", ""},
+		{"redir", "", ""},
+		{"ext", "", ""},
+		{"basicauth", "", ""},
+		{"internal", "", ""},
+		{"proxy", "", ""},
+		{"fastcgi", "", ""},
+		{"websocket", "", ""},
+		{"markdown", "", ""},
 	}
 	mids := []struct {
 		name string

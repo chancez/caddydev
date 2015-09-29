@@ -128,8 +128,8 @@ func gen(middlewares features.Middlewares) custombuild.CodeGenFunc {
 
 			// if after is set, locate directive and add after it.
 			after := getPrevDirective(mid.Directive)
-			if after != "" {
-				found := false
+			found := false
+			for after != "" {
 				c := node.(*ast.ValueSpec).Values[0].(*ast.CompositeLit)
 				for _, m := range c.Elts {
 					directive := m.(*ast.CompositeLit).Elts[0].(*ast.BasicLit)
@@ -137,14 +137,20 @@ func gen(middlewares features.Middlewares) custombuild.CodeGenFunc {
 						end = int(m.End()) + 1
 						found = true
 					}
-					// check if directive exists
+					// check if directive already exists
 					if strconv.Quote(mid.Directive) == directive.Value {
 						return fmt.Errorf("directive '%s' exists in Caddy core; use a distinct name", mid.Directive)
 					}
 				}
-				if !found {
-					return fmt.Errorf("cannot place '%s' after '%s': directive '%s' not found", mid.Directive, config.After, config.After)
+				if found {
+					break
 				}
+
+				// keep looking; try the directive before
+				after = getPrevDirective(after)
+			}
+			if !found {
+				return fmt.Errorf("cannot place '%s' after '%s': directive '%s' not found", mid.Directive, config.After, config.After)
 			}
 
 			out = out[:end] + snippet + out[end:]
