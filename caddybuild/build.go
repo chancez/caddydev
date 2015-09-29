@@ -139,11 +139,11 @@ func gen(middlewares features.Middlewares) custombuild.CodeGenFunc {
 					}
 					// check if directive exists
 					if strconv.Quote(mid.Directive) == directive.Value {
-						return fmt.Errorf("Directive '%s' exists in Caddy core, use a distinct name.", mid.Directive)
+						return fmt.Errorf("directive '%s' exists in Caddy core; use a distinct name", mid.Directive)
 					}
 				}
 				if !found {
-					return fmt.Errorf("Cannot place afer %s, directive '%s' not found.", config.After, config.After)
+					return fmt.Errorf("cannot place '%s' after '%s': directive '%s' not found", mid.Directive, config.After, config.After)
 				}
 			}
 
