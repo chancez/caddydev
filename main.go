@@ -94,7 +94,7 @@ func main() {
 		}
 	})
 
-	builder, err = caddybuild.PrepareBuild(features.Middlewares{config.Middleware})
+	builder, err = caddybuild.PrepareBuild(features.Middlewares{config.Middleware}, false)
 	exitIfErr(err)
 
 	// if output is set, generate binary only.

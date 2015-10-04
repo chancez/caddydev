@@ -49,15 +49,14 @@ func init() {
 // PrepareBuild prepares a custombuild.Builder for generating a custom binary using
 // middlewares. A call to Build on the returned builder will generate the binary.
 // If error is not nil, the returned Builder should be ignored.
-func PrepareBuild(middlewares features.Middlewares) (custombuild.Builder, error) {
+func PrepareBuild(middlewares features.Middlewares, pullLatest bool) (custombuild.Builder, error) {
 	// create builder
 	builder, err := custombuild.NewUnready(CaddyPackage, gen(middlewares), middlewares.Packages())
 	if err != nil {
 		return builder, err
 	}
 
-	// TODO make this configurable and enable only for dev
-	builder.UseNetworkForAll(false)
+	builder.UseNetworkForAll(pullLatest) // if true, run go get -u for all dependencies before each build
 
 	err = builder.Setup()
 	if err != nil {
