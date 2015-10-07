@@ -1,27 +1,30 @@
 # caddydev
-Tool for developing custom [Caddy](http://caddyserver.com) middleware.
+Tool for developing custom [Caddy](http://caddyserver.com) middleware/add-ons. It basically runs caddy like `go run` does except it splices in your add-on so you can invoke it with the new directive in your Caddyfile.
 
-### Installation
+## Installation
 ```shell
 $ go get github.com/caddyserver/caddydev
 ```
 
-### Middleware Development
-##### 1. Pull hello middleware.
+## Example
+### 1. Pull hello middleware.
 ```shell
 $ go get github.com/abiosoft/hello-caddy
 ```
-##### 2. Start caddydev.
+### 2. Start caddydev.
+You can specify your package as an import path or you can `cd` to your package's directory and forego the `--source` flag. **Don't forget to use a Caddyfile that has your new directive in it!**
 ```shell
 $ caddydev --source github.com/abiosoft/hello-caddy hello
 Starting caddy...
 0.0.0.0:2015
 ```
-##### 3. Test it.
+### 3. Test it.
 ```
 $ curl localhost:2015
 Hello, I'm a caddy middleware
 ```
+This works because the hello package comes with a sample Caddyfile that invokes it.
+
 [github.com/abiosoft/hello-caddy](https://github.com/abiosoft/hello-caddy) can be the template for your new middleware. Follow the link to learn more.
 
 ### Usage
