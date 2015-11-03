@@ -26,7 +26,7 @@ type Config struct {
 }
 
 const (
-	directivesFile = "config/directives.go"
+	directivesFile = "caddy/directives.go"
 	CaddyPackage   = "github.com/mholt/caddy"
 )
 
