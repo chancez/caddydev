@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"syscall"
@@ -109,8 +110,14 @@ func main() {
 	exitIfErr(err)
 	f.Close()
 
+	// fix for windows exe
+	fName := f.Name()
+	if runtime.GOOS == "windows" {
+		fName += ".exe"
+	}
+
 	// perform custom build
-	err = builder.Build("", "", f.Name(), args.goArgs...)
+	err = builder.Build("", "", fName, args.goArgs...)
 	exitIfErr(err)
 
 	fmt.Println("Starting caddy...")
@@ -267,8 +274,11 @@ func symlinkGOPATH(dir string) (string, error) {
 		return "", err
 	}
 	newpath := filepath.Join(src, "caddyaddon")
-	if err = os.Symlink(dir, newpath); err != nil {
-		return "", err
+	if err := os.Symlink(dir, newpath); err != nil {
+		// fall back to copy
+		if err := custombuild.DeepCopy(dir, newpath); err != nil {
+			return "", err
+		}
 	}
 	err = os.Setenv("GOPATH", gopath+string(filepath.ListSeparator)+os.Getenv("GOPATH"))
 	if err == nil {
