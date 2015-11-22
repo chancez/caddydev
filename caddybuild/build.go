@@ -148,7 +148,7 @@ func gen(middlewares features.Middlewares) custombuild.CodeGenFunc {
 				// keep looking; try the directive before
 				after = getPrevDirective(after)
 			}
-			if !found {
+			if !found && config.After != "" {
 				return fmt.Errorf("cannot place '%s' after '%s': directive '%s' not found", mid.Directive, config.After, config.After)
 			}
 
