@@ -192,6 +192,10 @@ func readConfig(args cliArgs) (caddybuild.Config, error) {
 	}
 	if args.source != "" {
 		if src := pkgFromDir(args.source); src != "" {
+			// replace \ with / on Windows for the import path.
+			if runtime.GOOS == "windows" {
+				src = strings.Replace(src, "\\", "/", -1)
+			}
 			config.Middleware.Package = src
 			return config, nil
 		}
