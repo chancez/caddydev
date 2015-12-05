@@ -37,14 +37,15 @@ Config | Type | Info | Default
 -------|------|------|--------
 directive | string |Directive of the middleware being developed. e.g. `hello` |
 source | string | Path to middleware source (or Go import path if available in $GOPATH) | current directory
-after | string | Priority. After which directive should our this directive be placed. |
+after | string | Priority. After which directive should this directive be placed. |
 update | boolean | Pull latest caddy source before building | false
 args | string | arguments to pass to resulting caddy binary |
-go_args | string | go build arguments to build with e.g. `-race -x -v` |
+go_args | string | 'go build' arguments to build with e.g. `-race -x -v` |
 
 There are two ways to specify this.
 
-1. config.json file
+#### 1. config.json file
+If specified, cli args are not required.
 ```json
 {
     "directive" :   "hello",
@@ -55,7 +56,8 @@ There are two ways to specify this.
     "go_args"   :   "-race -x -v"
 }
 ```
-2. CLI args 
+#### 2. CLI args
+If specified, takes priority over any matching config in `config.json`.
 ```bash
 $ caddydev -h
 Usage: caddydev [[options] directive [caddy args] [go [build args]]]
