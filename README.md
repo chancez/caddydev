@@ -7,19 +7,19 @@ $ go get github.com/caddyserver/caddydev
 ```
 
 ## Example
-### 1. Pull hello middleware.
+#### 1. Pull hello middleware.
 ```shell
 $ go get github.com/abiosoft/hello-caddy
 ```
-### 2. Start caddydev.
+#### 2. Start caddydev.
 **Don't forget to use a Caddyfile that has your new directive in it!**
 ```shell
 $ cd $GOPATH/src/github.com/abiosoft/hello-caddy
-$ caddydev hello
+$ caddydev
 Starting caddy...
 0.0.0.0:2015
 ```
-### 3. Test it.
+#### 3. Test it.
 ```
 $ curl localhost:2015
 Hello, I'm a caddy middleware
@@ -28,7 +28,7 @@ This works because the hello package comes with a sample Caddyfile that invokes 
 
 [github.com/abiosoft/hello-caddy](https://github.com/abiosoft/hello-caddy) can be the template for your new middleware. Follow the link to learn more.
 
-### Usage
+## Usage
 caddydev creates and starts a custom Caddy on the fly with the currently developed middleware integrated.
 
 The following configurations defines how caddydev runs. Only `directive` is required, everything else is optional.
