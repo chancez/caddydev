@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -19,30 +20,33 @@ import (
 )
 
 const (
-	usage = `Usage: caddydev [options] directive [caddy flags] [go [build flags]]
+	usage = `Usage: caddydev [[options] directive [caddy args] [go [build args]]]
 
 options:
-  -s, --source="."   Source code directory or go get path.
-  -a, --after=""     Priority. After which directive should our new directive be placed.
-  -u, --update=false Pull latest caddy source code before building.
-  -o, --output=""    Path to save custom build. If set, the binary will only be generated, not executed.
-                     Set GOOS, GOARCH, GOARM environment variables to generate for other platforms.
-  -h, --help=false   Show this usage.
+  -c, --conf="config.json" Config file to read from.
+  -s, --source="."         Source code directory or go get path.
+  -a, --after=""           Priority. After which directive should our new directive be placed.
+  -u, --update=false       Pull latest caddy source code before building.
+  -o, --output=""          Path to save custom build. If set, the binary will only be generated, not executed.
+                           Set GOOS, GOARCH, GOARM environment variables to generate for other platforms.
+  -h, --help=false         Show this usage.
 
 directive:
   directive of the middleware being developed.
 
-caddy flags:
-  flags to pass to the resulting custom caddy binary.
+caddy args:
+  args to pass to the resulting custom caddy binary.
 
-go build flags:
-  flags to pass to 'go build' while building custom binary prefixed with 'go'.
+go build args:
+  args to pass to 'go build' while building custom binary prefixed with 'go'.
   go keyword is used to differentiate caddy flags from go build flags.
   e.g. go -race -x -v.
 `
+	configFileName = "config.json"
 )
 
 type cliArgs struct {
+	conf      string
 	directive string
 	after     string
 	source    string
@@ -143,12 +147,14 @@ func main() {
 
 // parseArgs parses cli arguments. This caters for parsing extra flags to caddy.
 func parseArgs() (cliArgs, error) {
-	args := cliArgs{source: "."}
+	args := cliArgs{conf: configFileName, source: "."}
 
 	fs := flag.FlagSet{}
 	fs.SetOutput(ioutil.Discard)
 	h := false
 
+	fs.StringVar(&args.conf, "c", args.conf, "")
+	fs.StringVar(&args.conf, "conf", args.conf, "")
 	fs.StringVar(&args.after, "a", args.after, "")
 	fs.StringVar(&args.after, "after", args.after, "")
 	fs.StringVar(&args.source, "s", args.source, "")
@@ -164,10 +170,11 @@ func parseArgs() (cliArgs, error) {
 	if h || err != nil {
 		return args, fmt.Errorf(usage)
 	}
-	if fs.NArg() < 1 {
-		return args, usageError(fmt.Errorf("directive not set."))
+
+	if fs.NArg() > 0 {
+		args.directive = fs.Arg(0)
 	}
-	args.directive = fs.Arg(0)
+
 	// extract caddy and go args
 	if fs.NArg() > 1 {
 		remArgs := fs.Args()[1:]
@@ -181,7 +188,57 @@ func parseArgs() (cliArgs, error) {
 			args.caddyArgs = append(args.caddyArgs, arg)
 		}
 	}
+	addJSONConf(&args)
+
+	if args.directive == "" {
+		return args, usageError(fmt.Errorf("directive not set."))
+	}
 	return args, err
+}
+
+func addJSONConf(args *cliArgs) error {
+	type conf struct {
+		Directive string
+		After     string
+		Source    string
+		Update    bool
+		CaddyArgs string `json:"args"`
+		GoArgs    string `json:"go_args"`
+	}
+
+	confFile, err := os.Open(args.conf)
+	if err != nil {
+		if err == os.ErrNotExist && args.conf == configFileName {
+			return nil
+		}
+		return err
+	}
+
+	var c conf
+	if err := json.NewDecoder(confFile).Decode(&c); err != nil {
+		return err
+	}
+
+	// add unset configs so cli flag has priority
+	if args.after == "" && c.After != "" {
+		args.after = c.After
+	}
+	if args.caddyArgs == nil && c.CaddyArgs != "" {
+		args.caddyArgs = strings.Fields(c.CaddyArgs)
+	}
+	if args.directive == "" && c.Directive != "" {
+		args.directive = c.Directive
+	}
+	if args.goArgs == nil && c.GoArgs != "" {
+		args.goArgs = strings.Fields(c.GoArgs)
+	}
+	if args.source == "" && c.Source != "" {
+		args.source = c.Source
+	}
+	if !args.update && c.Update {
+		args.update = c.Update
+	}
+	return nil
 }
 
 // readConfig reads configs from the cli arguments.

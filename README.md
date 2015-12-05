@@ -12,9 +12,10 @@ $ go get github.com/caddyserver/caddydev
 $ go get github.com/abiosoft/hello-caddy
 ```
 ### 2. Start caddydev.
-You can specify your package as an import path or you can `cd` to your package's directory and forego the `--source` flag. **Don't forget to use a Caddyfile that has your new directive in it!**
+**Don't forget to use a Caddyfile that has your new directive in it!**
 ```shell
-$ caddydev --source github.com/abiosoft/hello-caddy hello
+$ cd $GOPATH/src/github.com/abiosoft/hello-caddy
+$ caddydev hello
 Starting caddy...
 0.0.0.0:2015
 ```
@@ -29,27 +30,54 @@ This works because the hello package comes with a sample Caddyfile that invokes 
 
 ### Usage
 caddydev creates and starts a custom Caddy on the fly with the currently developed middleware integrated.
+
+The following configurations defines how caddydev runs. Only `directive` is required, everything else is optional.
+
+Config | Type | Info | Default
+-------|------|------|--------
+directive | string |Directive of the middleware being developed. e.g. `hello` |
+source | string | Path to middleware source (or Go import path if available in $GOPATH) | current directory
+after | string | Priority. After which directive should our this directive be placed. |
+update | boolean | Pull latest caddy source before building | false
+args | string | arguments to pass to resulting caddy binary |
+go_args | string | go build arguments to build with e.g. `-race -x -v` |
+
+There are two ways to specify this.
+
+1. config.json file
+```json
+{
+    "directive" :   "hello",
+    "source"    :   "path/to/source or github.com/user/project",
+    "after"     :   "proxy",
+    "update"    :   false,
+    "args"      :   "-port 8080 -http=false",
+    "go_args"   :   "-race -x -v"
+}
 ```
+2. CLI args 
+```bash
 $ caddydev -h
-Usage: caddydev [options] directive [caddy flags] [go [build flags]]
+Usage: caddydev [[options] directive [caddy args] [go [build args]]]
 
 options:
-  -s, --source="."   Source code directory or go get path.
-  -a, --after=""     Priority. After which directive should our new directive be placed.
-  -u, --update=false Pull latest caddy source code before building.
-  -o, --output=""    Path to save custom build. If set, the binary will only be generated, not executed.
-                     Set GOOS, GOARCH, GOARM environment variables to generate for other platforms.
-  -h, --help=false   Show this usage.
+  -c, --conf="config.json" Config file to read from.
+  -s, --source="."         Source code directory or go get path.
+  -a, --after=""           Priority. After which directive should our new directive be placed.
+  -u, --update=false       Pull latest caddy source code before building.
+  -o, --output=""          Path to save custom build. If set, the binary will only be generated, not executed.
+                           Set GOOS, GOARCH, GOARM environment variables to generate for other platforms.
+  -h, --help=false         Show this usage.
 
 directive:
   directive of the middleware being developed.
 
-caddy flags:
-  flags to pass to the resulting custom caddy binary.
+caddy args:
+  args to pass to the resulting custom caddy binary.
 
-go build flags:
-  flags to pass to 'go build' while building custom binary prefixed with 'go'.
-  go keyword is used to differentiate caddy flags from go build flags.
+go build args:
+  args to pass to 'go build' while building custom binary prefixed with 'go'.
+  go keyword is used to differentiate caddy args from go build args.
   e.g. go -race -x -v.
 ```
 
