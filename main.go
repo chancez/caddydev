@@ -218,10 +218,15 @@ func pkgFromDir(dir string) string {
 				return strings.TrimPrefix(absdir, gosrc)
 			}
 		}
+
 		// not in GOPATH, create symlink to fake GOPATH.
 		if newpath, err := symlinkGOPATH(dir); err == nil {
 			return filepath.Base(newpath)
 		}
+	}
+
+	if isLocalPkg(dir) {
+		return dir
 	}
 
 	return ""
