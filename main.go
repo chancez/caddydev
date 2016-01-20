@@ -188,7 +188,10 @@ func parseArgs() (cliArgs, error) {
 			args.caddyArgs = append(args.caddyArgs, arg)
 		}
 	}
-	addJSONConf(&args)
+
+	if err := addJSONConf(&args); err != nil {
+		return args, err
+	}
 
 	if args.directive == "" {
 		return args, usageError(fmt.Errorf("directive not set."))
@@ -232,7 +235,7 @@ func addJSONConf(args *cliArgs) error {
 	if args.goArgs == nil && c.GoArgs != "" {
 		args.goArgs = strings.Fields(c.GoArgs)
 	}
-	if args.source == "" && c.Source != "" {
+	if (args.source == "" && c.Source != "") || (args.source == "." && c.Source != "") {
 		args.source = c.Source
 	}
 	if !args.update && c.Update {
