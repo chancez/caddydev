@@ -211,7 +211,7 @@ func addJSONConf(args *cliArgs) error {
 
 	confFile, err := os.Open(args.conf)
 	if err != nil {
-		if err == os.ErrNotExist && args.conf == configFileName {
+		if os.IsNotExist(err) && args.conf == configFileName {
 			return nil
 		}
 		return err
